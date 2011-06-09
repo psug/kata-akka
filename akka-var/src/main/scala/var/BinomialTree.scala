@@ -32,7 +32,6 @@ object BinomialTree {
 
   def price(layers: Int)(option : Option, spot : Double, r : Double, sigma : Double) : OptionPrice = {
     val time = option.maturityInYears / layers
-    print(time)
     val vst	= sigma * Math.sqrt(time)
     val down = Math.exp(-vst)
     val up = Math.exp(vst)
