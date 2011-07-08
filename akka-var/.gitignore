@@ -1,6 +1,6 @@
-server.iml
-server.ipr
-server.iws
+*.iml
+*.ipr
+*.iws
 target/
 lib_managed/
 src_managed/
