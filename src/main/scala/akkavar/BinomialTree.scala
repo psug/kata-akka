@@ -1,13 +1,8 @@
-/**
- * Copyright 2010 Murex, S.A. All Rights Reserved.
- *
- * This software is the proprietary information of Murex, S.A.
- * Use is subject to license terms.
- */
+
 package akkavar
 
 import Options._
-import Math._
+import math._
 
 object BinomialTree { 
 
@@ -20,7 +15,7 @@ object BinomialTree {
 
   def backwardStep(downProba : Double, upProba : Double, r : Double, t : Double, K : Double)(layer1 : Array[Quote], layer2 : Array[Quote]) : Array[Quote] = { 
     for(i <- 0 to layer1.length - 1) {  
-      val premium = (downProba * layer2(i).premium + upProba *layer2(i + 1).premium) * Math.exp(- r * t)
+      val premium = (downProba * layer2(i).premium + upProba *layer2(i + 1).premium) * exp(- r * t)
       layer1(i) = Quote(layer1(i).spot, max(K -layer1(i).spot, premium))
     }
     layer1
@@ -32,10 +27,10 @@ object BinomialTree {
 
   def price(layers: Int)(option : Option, spot : Double, r : Double, sigma : Double) : OptionPrice = {
     val time      = option.maturityInYears / layers
-    val vst       = sigma * Math.sqrt(time)
-    val down      = Math.exp(-vst)
-    val up        = Math.exp(vst)
-    val growth    = Math.exp(r * time)
+    val vst       = sigma * sqrt(time)
+    val down      = exp(-vst)
+    val up        = exp(vst)
+    val growth    = exp(r * time)
     val upProba   = (growth - down) / (up - down)
     val downProba = 1 - upProba
 
@@ -57,7 +52,7 @@ object BinomialTree {
 
     curLayer = evaluate(option.strike)(curLayer)
 
-    var updTree = for(layer <- tree) yield { 
+    val updTree = for(layer <- tree) yield {
       val newLayer = bkwd(layer,curLayer)
       curLayer = layer
       newLayer

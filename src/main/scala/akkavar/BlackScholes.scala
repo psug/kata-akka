@@ -1,13 +1,8 @@
-/**
- * Copyright 2010 Murex, S.A. All Rights Reserved.
- *
- * This software is the proprietary information of Murex, S.A.
- * Use is subject to license terms.
- */
+
 package akkavar
 
 import Options._
-
+import math._
 /**
  * Implements Black Scholes evaluation method for Options.
  */
@@ -24,8 +19,8 @@ object BlackScholes {
    * @param sigma  volatility
    */
   def price(option : Option, spot : Double, r : Double, sigma : Double) : OptionPrice = {
-    val vst	= sigma * Math.sqrt(option.maturityInYears)
-    val d1	= option.sign * (Math.log(spot / option.strike) / vst + 0.5 * vst)
+    val vst	= sigma * sqrt(option.maturityInYears)
+    val d1	= option.sign * (log(spot / option.strike) / vst + 0.5 * vst)
     val normd1	= normalDistribution.cumulativeProbability(d1)
     val d2	= d1 - option.sign * vst
     val delta	= option.sign * normd1 / (1 + r) 
