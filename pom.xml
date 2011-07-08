@@ -1,132 +1,140 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>var</groupId>
-    <artifactId>akka-var</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>VaR :: Akka</name>
-    <packaging>jar</packaging>
-    <description>Distributed VaR computation using Akka</description>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>var</groupId>
+  <artifactId>akka-var</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>VaR :: Akka</name>
+  <packaging>jar</packaging>
+  <description>Distributed VaR computation using Akka</description>
 
 
-    <repositories>
-        <repository>
-            <id>scala-tools.org</id>
-            <name>Scala-tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
-        </repository>
+  <repositories>
+    <repository>
+      <id>scala-tools.org</id>
+      <name>Scala-tools Maven2 Repository</name>
+      <url>http://scala-tools.org/repo-releases</url>
+    </repository>
 
-        <repository>
-            <id>Akka</id>
-            <name>Akka Maven2 Repository</name>
-            <url>http://akka.io/repository/</url>
-        </repository>
+    <repository>
+      <id>Akka</id>
+      <name>Akka Maven2 Repository</name>
+      <url>http://akka.io/repository/</url>
+    </repository>
 
-    </repositories>
-
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <scala.version>2.9.0-1</scala.version>
-    </properties>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-math</groupId>
-            <artifactId>commons-math</artifactId>
-            <version>1.2</version>
-        </dependency>
+  </repositories>
 
 
-        <!-- Akka  -->
-        <dependency>
-           <groupId>se.scalablesolutions.akka</groupId>
-           <artifactId>akka-actor</artifactId>
-           <version>1.1.2</version>
-        </dependency>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <scala.version>2.9.0-1</scala.version>
+  </properties>
 
-        <dependency>
-           <groupId>se.scalablesolutions.akka</groupId>
-           <artifactId>akka-remote</artifactId>
-           <version>1.1.2</version>
-        </dependency>
+  <dependencies>
 
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
 
-        <!-- Test -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>1.8.4</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2_${scala.version}</artifactId>
-            <version>1.4</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2-scalaz-core_${scala.version}</artifactId>
-            <version>6.0.RC2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.7</version>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math</artifactId>
+      <version>2.2</version>
+    </dependency>
 
 
-    </dependencies>
+    <!-- Akka  -->
+    <dependency>
+      <groupId>se.scalablesolutions.akka</groupId>
+      <artifactId>akka-actor</artifactId>
+      <version>1.1.2</version>
+    </dependency>
 
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>2.13.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>add-source</goal>
-                            <goal>compile</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-
-                <configuration>
-                    <scalaVersion>${scala.version}</scalaVersion>
-                    <args>
-                        <args>-encoding</args>
-                        <args>UTF8</args>
-                    </args>
-
-                </configuration>
+    <dependency>
+      <groupId>se.scalablesolutions.akka</groupId>
+      <artifactId>akka-remote</artifactId>
+      <version>1.1.2</version>
+    </dependency>
 
 
-            </plugin>
+    <!-- Test -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.8.4</version>
+      <scope>test</scope>
+    </dependency>
 
-        </plugins>
-    </build>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.8.5</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.specs2</groupId>
+      <artifactId>specs2_${scala.version}</artifactId>
+      <version>1.4</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.specs2</groupId>
+      <artifactId>specs2-scalaz-core_${scala.version}</artifactId>
+      <version>6.0.RC2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.7</version>
+      <scope>test</scope>
+    </dependency>
+
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+          <includes>
+            <include>**/*Spec.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.scala-tools</groupId>
+        <artifactId>maven-scala-plugin</artifactId>
+        <version>2.13.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+
+        <configuration>
+          <scalaVersion>${scala.version}</scalaVersion>
+          <args>
+            <args>-encoding</args>
+            <args>UTF8</args>
+          </args>
+        </configuration>
+
+      </plugin>
+
+    </plugins>
+  </build>
 </project>

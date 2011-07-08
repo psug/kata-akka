@@ -2,6 +2,7 @@ package akkavar
 
 
 import Options._
+import math._
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -70,5 +71,19 @@ class PriceSpec extends Specification  {
     }
   }
 
+  "a Value at Risk computation" should { 
+
+    import VaR._
+
+    "provide generation of market data " in { 
+      val mktdata = generateMarketData(1000)(MarketData(100,0.05,0.1), MarketData(10,0.01,0.02))
+      mktdata.length must be_==(1000)
+    }
+
+    "provide 1% VaR for a given option" in { 
+      val var1 = computeVaR(0.01, call, MarketData(100,0.05,0.1), MarketData(10,0.01,0.02))
+      var1 must beCloseTo(0.12,0.000001)
+    }
+  }
 }
 

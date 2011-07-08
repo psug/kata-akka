@@ -8,7 +8,7 @@ import math._
  */
 object BlackScholes {
 
-  val normalDistribution = org.apache.commons.math.distribution.DistributionFactory.newInstance.createNormalDistribution
+  val normalDistribution = new org.apache.commons.math.distribution.NormalDistributionImpl
 
   /**
    * Compute price of an option.
