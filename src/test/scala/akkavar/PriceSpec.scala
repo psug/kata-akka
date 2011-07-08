@@ -50,7 +50,7 @@ class PriceSpec extends Specification  {
       val K = 0.1
       val r = 1
       val t = 1
-      backwardStep(pup,pdown,r,t, K)(layer1,layer)(0).premium must beCloseTo((0.5 * 0.05 + 0.5 * 0.06) * Math.exp(-1),0.000001)
+      backwardStep(pup,pdown,r,t, K)(layer1,layer)(0).premium must beCloseTo((0.5 * 0.05 + 0.5 * 0.06) * exp(-1),0.000001)
     }
 
     "evaluating a layer yields max(K - S, current premium)" in { 

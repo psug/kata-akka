@@ -1,9 +1,4 @@
-/**
- * Copyright 2010 Murex, S.A. All Rights Reserved.
- *
- * This software is the proprietary information of Murex, S.A.
- * Use is subject to license terms.
- */
+
 package akkavar
 
 
