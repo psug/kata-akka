@@ -1,0 +1,6 @@
+server.iml
+server.ipr
+server.iws
+target/
+lib_managed/
+src_managed/
