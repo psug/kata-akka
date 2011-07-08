@@ -73,7 +73,7 @@ object PriceSpec extends Specification  {
       price(5)(Put(150,50.0),50.0,0.10,0.4).premium must beCloseTo(4.49,0.01)
     }
   }
-  
+
 }
 
 class PriceTest extends JUnit4(PriceSpec)
