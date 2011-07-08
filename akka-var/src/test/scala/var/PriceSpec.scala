@@ -1,17 +1,13 @@
-/**
- * Copyright 2010 Murex, S.A. All Rights Reserved.
- *
- * This software is the proprietary information of Murex, S.A.
- * Use is subject to license terms.
- */
 package akkavar
 
-import org.specs.runner.JUnit4
-import org.specs._
 
 import Options._
+import org.specs2.mutable.Specification
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
-object PriceSpec extends Specification  {
+@RunWith(classOf[JUnitRunner])
+class PriceSpec extends Specification  {
 
   val call = Call(360,100.0)
   val put = Put(360,100.0)
@@ -76,4 +72,3 @@ object PriceSpec extends Specification  {
   
 }
 
-class PriceTest extends JUnit4(PriceSpec)
