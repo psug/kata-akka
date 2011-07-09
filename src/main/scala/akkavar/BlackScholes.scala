@@ -23,7 +23,7 @@ object BlackScholes {
     val d1	= option.sign * (log(spot / option.strike) / vst + 0.5 * vst)
     val normd1	= normalDistribution.cumulativeProbability(d1)
     val d2	= d1 - option.sign * vst
-    val delta	= option.sign * normd1 / (1 + r) 
+    val delta	= option.sign * normd1 / (1 + r)
     val premium = spot * delta - option.sign * option.strike * normalDistribution.cumulativeProbability(d2) / (1+r)
     val gamma	= normd1 / ((1+r) * spot * vst)
     val vega	= gamma * spot * spot * sigma * option.maturityInYears

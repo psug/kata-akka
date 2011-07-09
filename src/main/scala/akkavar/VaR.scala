@@ -17,11 +17,13 @@ object VaR {
 
   case class MarketData(spot: Double, r: Double, vol: Double)
 
-  def computeVaR(threshold: Double, contract: Option, mean: MarketData, variance: MarketData) : Double = { 
+  def computeVaR(threshold: Double, contract: Option, mean: MarketData, variance: MarketData) : Double = {
     val data = generateMarketData(100000)(mean, variance)
     val prices = data.map { mkt => price(contract, mkt.spot, mkt.r, mkt.vol).premium }
     val onepercent = new Percentile().evaluate(prices,0.01)
+    println("1% = "+ onepercent)
     val actualprice = price(contract, mean.spot,mean.r,mean.vol)
+    println("price = "+ actualprice)
     (onepercent - actualprice.premium) / actualprice.premium
   }
 
@@ -36,13 +38,13 @@ object VaR {
   def generateMarketData(count: Int)(mean: MarketData, variance: MarketData): Array[MarketData] =
     (1 to count).map { _ => generateOnePoint(mean, variance) }.toArray
 
-
-  def generateOnePoint(mean: MarketData, sigma: MarketData): MarketData = {
+  def generateOnePoint(mean: MarketData, variance: MarketData): MarketData = {
     val spotRandom = gaussian.nextNormalizedDouble
     val rRandom = gaussian.nextNormalizedDouble
     val volRandom = gaussian.nextNormalizedDouble
-    MarketData(spotRandom * sigma.spot + mean.spot,
-               rRandom * sigma.r + mean.r,
-               volRandom * sigma.vol + mean.vol)
+    MarketData(spotRandom * variance.spot + mean.spot,
+               rRandom * variance.r + mean.r,
+               volRandom * variance.vol + mean.vol)
   }
+
 }

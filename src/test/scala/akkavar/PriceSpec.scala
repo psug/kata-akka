@@ -81,7 +81,7 @@ class PriceSpec extends Specification  {
     }
 
     "provide 1% VaR for a given option" in { 
-      val var1 = computeVaR(0.01, call, MarketData(100,0.05,0.1), MarketData(10,0.01,0.02))
+      val var1 = computeVaR(0.01, call, MarketData(100,0.05,0.1), MarketData(10,0.001,0.01))
       var1 must beCloseTo(0.12,0.000001)
     }
   }
