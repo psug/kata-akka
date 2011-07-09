@@ -57,7 +57,7 @@ object BinomialTree {
       curLayer = layer
       newLayer
     }
-    println(updTree.map(_.mkString(",")))
+
     OptionPrice(curLayer(0).premium, delta, gamma, vega, theta)
   }
 }

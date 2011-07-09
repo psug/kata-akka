@@ -67,7 +67,9 @@ class PriceSpec extends Specification  {
        * Option characteristics comes from 'Options, Futures and Other derivatives', J.Hull, 7th Edition, p.411
        * tolerance in results is greater than usual because computations in book are truncated at 2 digits.
        */
-      price(5)(Put(150,50.0),50.0,0.10,0.4).premium must beCloseTo(4.49,0.01)
+      val bs = BlackScholes.price(Put(150,50.0),50.0,0.10,0.4).premium
+      val bt = price(100)(Put(150,50.0),50.0,0.10,0.4).premium 
+      bs must beCloseTo(bt,0.01)
     }
   }
 
@@ -81,7 +83,7 @@ class PriceSpec extends Specification  {
     }
 
     "provide 1% VaR for a given option" in { 
-      val var1 = computeVaR(0.01, call, MarketData(100,0.05,0.1), MarketData(10,0.001,0.01))
+      val var1 = computeVaR(1, call, MarketData(100,0.05,0.1), MarketData(10,0.001,0.01))
       var1 must beCloseTo(0.12,0.000001)
     }
   }

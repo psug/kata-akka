@@ -20,11 +20,11 @@ object VaR {
   def computeVaR(threshold: Double, contract: Option, mean: MarketData, variance: MarketData) : Double = {
     val data = generateMarketData(100000)(mean, variance)
     val prices = data.map { mkt => price(contract, mkt.spot, mkt.r, mkt.vol).premium }
-    val onepercent = new Percentile().evaluate(prices,0.01)
-    println("1% = "+ onepercent)
+    val percent = new Percentile().evaluate(prices,threshold)
+    println(threshold + "% = " + percent)
     val actualprice = price(contract, mean.spot,mean.r,mean.vol)
     println("price = "+ actualprice)
-    (onepercent - actualprice.premium) / actualprice.premium
+    (percent - actualprice.premium) / actualprice.premium
   }
 
   /**
