@@ -4,7 +4,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.Specification
 import akka.actor.Actor._
-import akka.actor.Actor
+import akkavar.workers.{Worker, WorkOutput, WorkInput, CentralDispatcher}
 
 /**
  * User: alag
@@ -19,8 +19,10 @@ class AkkaWorkersSpec extends Specification {
 
   "central dispatcher" should  {
     "dispatch work to workers" in {
+
       remote.start()
       val centralDispatcher = actorOf[CentralDispatcher]
+      remote.addListener(centralDispatcher)
       remote.register("CentralDispatcher", centralDispatcher )
 
 
@@ -33,10 +35,15 @@ class AkkaWorkersSpec extends Specification {
       val Some( workOuput ) = centralDispatcher !!  WorkInput( data )
 
 
+      worker.stop()
+      
+
+
+
+      Thread.sleep(1000)
       remote.unregister("CentralDispatcher")
       remote.shutdown()
 
-      worker.stop()
       centralDispatcher.stop()
 
       workOuput === WorkOutput( data )

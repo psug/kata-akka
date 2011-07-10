@@ -1,4 +1,4 @@
-package akkavar
+package akkavar.work
 
 import Options._
 import BlackScholes._

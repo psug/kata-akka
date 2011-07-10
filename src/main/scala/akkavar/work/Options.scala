@@ -1,8 +1,7 @@
+package akkavar.work
 
-package akkavar
 
-
-object Options { 
+object Options {
 
   /**
    * Pricing characteristics of the option.

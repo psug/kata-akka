@@ -1,11 +1,10 @@
-package akkavar
+package akkavar.workers
 
 import akka.actor.Actor._
 import akka.actor.{ActorRef, Actor}
 import util.Random
 import collection.mutable.ArrayBuffer
-import java.lang.annotation.Target
-
+import java.net.InetAddress
 
 /**
  * User: alag
@@ -21,7 +20,12 @@ case object RegisterWorker
 
 class Worker( f : WorkInput => WorkOutput, centralDispatcherHost:String ) extends Actor {
 
+  override def postStop(){
+    println( "Stop ---------- " + self)
+  }
   override def preStart(){
+    // starting on another port than expecting server to avoid client/server collision
+    remote.start( InetAddress.getLocalHost.getHostName,5225 )
     val centralDispatcher = remote.actorFor( "CentralDispatcher", centralDispatcherHost, 2552)
     centralDispatcher ! RegisterWorker
     println( "Register ---------- " + self)
@@ -40,7 +44,9 @@ class CentralDispatcher extends Actor {
 
   def receive = {
     case WorkInput( data ) =>
-      val future = workers( Random.nextInt( workers.size ) ) !!! WorkInput( data )
+      val worker = workers( Random.nextInt( workers.size ) )
+      println( "Dispatch to " + worker )
+      val future = worker !!! WorkInput( data )
 
       self.senderFuture.foreach{
         senderFutur =>
@@ -50,8 +56,13 @@ class CentralDispatcher extends Actor {
 
 
     case RegisterWorker =>
-      println( "Register " + self.sender )
-      workers += self.sender.get
+      println( "Register " + self.sender +" - " + self.sender.get.homeAddress )
+      self.sender.foreach( workers += _ )
+
+
+
+
+    case m => println("UnManaged message: " + m )
   }
 
 }
