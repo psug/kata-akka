@@ -41,14 +41,13 @@ class CentralDispatcher extends Actor {
   def receive = {
     case WorkInput( data ) =>
       val future = workers( Random.nextInt( workers.size ) ) !!! WorkInput( data )
-      self.sender foreach  {
-        target =>
-        future.onComplete{ future =>
-          println( "Work complete " + future.result + " send result to " + target )
-          future.result.foreach( target !  _  )
-        }
 
+      self.senderFuture.foreach{
+        senderFutur =>
+         senderFutur.completeWith( future )
       }
+
+
 
     case RegisterWorker =>
       println( "Register " + self.sender )

@@ -30,18 +30,8 @@ class AkkaWorkersSpec extends Specification {
 
       val data = "Data"
 
-      val actor = actorOf{ new Actor {
-        def receive = {
-          case wi:WorkInput =>
-            val Some( workOuput ) = centralDispatcher !! wi
-            println( "Test result got " + workOuput )
-            self.reply( workOuput )
-        }
-      }}.start()
+      val Some( workOuput ) = centralDispatcher !!  WorkInput( data )
 
-      val Some( workOuput ) = actor !!  WorkInput( data )
-
-      actor.stop()
 
       remote.unregister("CentralDispatcher")
       remote.shutdown()
