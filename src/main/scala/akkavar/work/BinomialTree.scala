@@ -1,5 +1,5 @@
+package akkavar.work
 
-package akkavar
 
 import Options._
 import math._

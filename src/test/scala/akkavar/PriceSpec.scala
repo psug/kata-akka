@@ -1,7 +1,7 @@
 package akkavar
 
-
-import Options._
+import work._
+import work.Options._
 import math._
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
