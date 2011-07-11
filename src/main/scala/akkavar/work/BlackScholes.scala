@@ -30,5 +30,8 @@ object BlackScholes {
     val theta	= -0.5 * vega * sigma / option.maturityInYears
     OptionPrice(premium, delta, gamma, vega, theta)
   }
+
+  def prices(options : Array[Option],  spot : Double, r : Double, sigma : Double) : Array[OptionPrice] = options.map { o => price(o, spot, r, sigma) }
+
 }
 

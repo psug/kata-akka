@@ -16,20 +16,43 @@ object VaR {
   val gaussian = new GaussianRandomGenerator(rg);
 
   case class MarketData(spot: Double, r: Double, vol: Double)
+  
+  /**
+   * Compute 1% VaR of an array of options (eg. a Portolio) using samples size of marketdata and given mean and variance.
+   * VaR is computed sequentially.
+   */
+  def computeVaRSequentially(samples : Int, portfolio : Array[Option], mean: MarketData, variance: MarketData) : Double = {
+    val (simul, percent) = computeVaRRaw(samples, 1, portfolio, mean, variance)
+    val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
+    (percent - actualprice) / actualprice
+  }
 
-  def computeVaR(threshold: Double, contract: Option, mean: MarketData, variance: MarketData) : Double = {
-    val data = generateMarketData(1000)(mean, variance)
+  
+  def computeVaRRaw(samples : Int, threshold: Double, contracts : Array[Option], mean: MarketData, variance: MarketData) : (Array[Double], Double) = {
+    val data = generateMarketData(samples)(mean, variance)
+    val simul = data.map { 
+      mkt => { 
+        val p = prices(contracts, mkt.spot, mkt.r, mkt.vol)
+        val price = p.map( _.premium ).foldLeft(0.0)(_ + _)
+        println("%.4f;%.4f;%.4f;%.4f".format(mkt.spot,mkt.r,mkt.vol, price))
+        price
+        }
+    }
+    val percent = new Percentile().evaluate(simul,threshold)
+    (simul.filter(_ <= percent), percent)
+  }
+
+  def computeVaR(samples : Int, threshold: Double, contract: Option, mean: MarketData, variance: MarketData) : Double = {
+    val data = generateMarketData(samples)(mean, variance)
     val prices = data.map { 
       mkt => { 
         val p = price(contract, mkt.spot, mkt.r, mkt.vol)
-        println("%.4f;%.4f;%.4f;%.4f".format(mkt.spot,mkt.r,mkt.vol, p.premium))
+        println("%.4f\t%.4f\t%.4f\t%.4f".format(mkt.spot,mkt.r,mkt.vol, p.premium))
         p.premium 
-      }
+        }
     }
     val percent = new Percentile().evaluate(prices,threshold)
-    println(threshold + "% = " + percent)
     val actualprice = price(contract, mean.spot,mean.r,mean.vol)
-    
     (percent - actualprice.premium) / actualprice.premium
   }
 
@@ -47,10 +70,9 @@ object VaR {
   def generateOnePoint(mean: MarketData, variance: MarketData): MarketData = {
     val spotRandom = gaussian.nextNormalizedDouble
     val rRandom = gaussian.nextNormalizedDouble
-    val volRandom = gaussian.nextNormalizedDouble
     MarketData(spotRandom * variance.spot + mean.spot,
                rRandom * variance.r + mean.r,
-               volRandom * variance.vol + mean.vol)
+               mean.vol)
   }
 
 }

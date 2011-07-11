@@ -118,19 +118,24 @@
         <version>2.13.1</version>
         <executions>
           <execution>
+            <id>cc</id>
             <goals>
               <goal>add-source</goal>
               <goal>compile</goal>
               <goal>testCompile</goal>
             </goals>
+            <phase>compile</phase>
+            <configuration>
+              <useFsc>true</useFsc>
+              <once>true</once>
+            </configuration>
           </execution>
         </executions>
-
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
           <args>
             <args>-encoding</args>
-            <args>UTF8</args>
+            <args>${project.build.sourceEncoding}</args>
           </args>
         </configuration>
 

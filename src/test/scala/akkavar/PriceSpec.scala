@@ -69,6 +69,10 @@ class PriceSpec extends Specification  {
        */
       val bs = BlackScholes.price(Put(150,50.0),50.0,0.10,0.4).premium
       val bt = price(100)(Put(150,50.0),50.0,0.10,0.4).premium 
+
+      /*
+       * Binomial tree converges to black-scholes so both prices must be equal
+       */
       bs must beCloseTo(bt,0.01)
     }
   }
@@ -83,9 +87,33 @@ class PriceSpec extends Specification  {
     }
 
     "provide 1% VaR for a given option" in { 
-      val var1 = computeVaR(1, call, MarketData(100,0.05,0.1), MarketData(10,0.001,0.01))
-      var1 must beCloseTo(0.12,0.000001)
+      val var1 = computeVaR(1000, 1, call, MarketData(100,0.05,0.20), MarketData(20,0.001,0))
+      /*
+       * all random variables used for generating scenarios are independent so the 1% var must
+       * be equal to 1% of the mean price !
+       */
+      var1 must beCloseTo(-0.99,0.01)
     }
+  }
+
+
+  "distributing VaR computation" should {
+
+    import VaR._
+
+    "compute VaR sequentially" in { 
+      val portfolio : Array[Option] = for(maturity <- Range(30 ,720 , 30).toArray; strike <- Range(10, 200 , 10).toArray) yield Call(maturity, strike)
+      val samples = 1000
+
+      val start = System.nanoTime
+      val vaR = computeVaRSequentially(samples, portfolio, MarketData(100,0.05,0.20), MarketData(20,0.001,0))
+      val elapsedMs : Double = (System.nanoTime - start) / 1000000.0
+
+      println("sequential VaR computation (" + samples +" scenarios, "+ portfolio.length +" positions) = " + "%.3f".format(elapsedMs))
+
+      vaR must beCloseTo(-0.7452,0.0001)
+    }
+
   }
 }
 
