@@ -2,6 +2,8 @@ package akkavar
 
 import work._
 import work.Options._
+import work.VaR._
+
 import math._
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
@@ -12,7 +14,9 @@ class PriceSpec extends Specification  {
 
   val call = Call(360,100.0)
   val put = Put(360,100.0)
-  
+  val mean = MarketData(100,0.05,0.20)
+  val variance = MarketData(20,0.001,0)
+
   "A black-scholes pricer" should  {
     
     "Price a put and call option" in {
@@ -87,7 +91,7 @@ class PriceSpec extends Specification  {
     }
 
     "provide 1% VaR for a given option" in { 
-      val var1 = computeVaR(1000, 1, call, MarketData(100,0.05,0.20), MarketData(20,0.001,0))
+      val var1 = computeVaR(1000, 1, call, mean, variance)
       /*
        * all random variables used for generating scenarios are independent so the 1% var must
        * be equal to 1% of the mean price !
@@ -99,21 +103,30 @@ class PriceSpec extends Specification  {
 
   "distributing VaR computation" should {
 
-    import VaR._
+    val portfolio : Array[Option] = for(maturity <- Range(30 ,720 , 30).toArray; strike <- Range(10, 200 , 10).toArray) yield Call(maturity, strike)
+    val samples = 1000
 
     "compute VaR sequentially" in { 
-      val portfolio : Array[Option] = for(maturity <- Range(30 ,720 , 30).toArray; strike <- Range(10, 200 , 10).toArray) yield Call(maturity, strike)
-      val samples = 1000
 
       val start = System.nanoTime
-      val vaR = computeVaRSequentially(samples, portfolio, MarketData(100,0.05,0.20), MarketData(20,0.001,0))
+      val vaR = computeVaRSequentially(samples, portfolio, mean, variance)
       val elapsedMs : Double = (System.nanoTime - start) / 1000000.0
 
       println("sequential VaR computation (" + samples +" scenarios, "+ portfolio.length +" positions) = " + "%.3f".format(elapsedMs))
 
-      vaR must beCloseTo(-0.7452,0.0001)
+      vaR must beCloseTo(-0.75,0.05)
     }
 
+    "compute VaR with akka workers" in { 
+      val start = System.nanoTime
+      val vaR = computeVaRInParallel(samples, portfolio, mean, variance)
+      val elapsedMs : Double = (System.nanoTime - start) / 1000000.0
+
+      println("parallel VaR computation (" + samples +" scenarios, "+ portfolio.length +" positions) = " + "%.3f".format(elapsedMs))
+
+      vaR must beCloseTo(-0.75,0.05)
+
+    }
   }
 }
 

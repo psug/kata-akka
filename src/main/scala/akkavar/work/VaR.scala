@@ -16,30 +16,51 @@ object VaR {
   val gaussian = new GaussianRandomGenerator(rg);
 
   case class MarketData(spot: Double, r: Double, vol: Double)
-  
+
+  case class VaRInput(samples : Int,             /* number of random MktData parameters to generate */
+                      threshold: Double,         /* percentile to select */
+                      contracts : Array[Option], /* portfolio to evaluate */
+                      mean: MarketData,          /* mean distribution of market data parameters */
+                      variance: MarketData       /* variance of marketdata parameters */
+                    )
+
+  case class  VaRResult(percentile : Array[Double], /* low percentile prices */
+                        threshold: Double           /* threshold value (ie. upper limit of percentile values) */
+                      )
+
+  type ComputeVaR = VaRInput => VaRResult
+
+  /**
+   * Same as above but VaR is computed in parallel.
+   */
+  def computeVaRInParallel(samples : Int, portfolio : Array[Option], mean: MarketData, variance: MarketData) : Double = {
+    val VaRResult(simul, percent) = computeVaRRaw(VaRInput(samples, 1, portfolio, mean, variance))
+    val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
+    (percent - actualprice) / actualprice
+  }
+
   /**
    * Compute 1% VaR of an array of options (eg. a Portolio) using samples size of marketdata and given mean and variance.
    * VaR is computed sequentially.
    */
   def computeVaRSequentially(samples : Int, portfolio : Array[Option], mean: MarketData, variance: MarketData) : Double = {
-    val (simul, percent) = computeVaRRaw(samples, 1, portfolio, mean, variance)
+    val VaRResult(simul, percent) = computeVaRRaw(VaRInput(samples, 1, portfolio, mean, variance))
     val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
     (percent - actualprice) / actualprice
   }
 
-  
-  def computeVaRRaw(samples : Int, threshold: Double, contracts : Array[Option], mean: MarketData, variance: MarketData) : (Array[Double], Double) = {
-    val data = generateMarketData(samples)(mean, variance)
+  def computeVaRRaw(in : VaRInput) : VaRResult = {
+    val data = generateMarketData(in.samples)(in.mean, in.variance)
     val simul = data.map { 
       mkt => { 
-        val p = prices(contracts, mkt.spot, mkt.r, mkt.vol)
+        val p = prices(in.contracts, mkt.spot, mkt.r, mkt.vol)
         val price = p.map( _.premium ).foldLeft(0.0)(_ + _)
         println("%.4f;%.4f;%.4f;%.4f".format(mkt.spot,mkt.r,mkt.vol, price))
         price
         }
     }
-    val percent = new Percentile().evaluate(simul,threshold)
-    (simul.filter(_ <= percent), percent)
+    val percent = new Percentile().evaluate(simul,in.threshold)
+    VaRResult(simul.filter(_ <= percent), percent)
   }
 
   def computeVaR(samples : Int, threshold: Double, contract: Option, mean: MarketData, variance: MarketData) : Double = {
