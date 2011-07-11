@@ -2,7 +2,6 @@ package akkavar
 
 import work._
 import work.Options._
-import work.VaR._
 
 import math._
 import org.specs2.mutable.Specification
@@ -83,7 +82,7 @@ class PriceSpec extends Specification  {
 
   "a Value at Risk computation" should { 
 
-    import VaR._
+    import sequentialVaR._
 
     "provide generation of market data " in { 
       val mktdata = generateMarketData(1000)(MarketData(100,0.05,0.1), MarketData(10,0.01,0.02))
@@ -91,7 +90,7 @@ class PriceSpec extends Specification  {
     }
 
     "provide 1% VaR for a given option" in { 
-      val var1 = computeVaR(1000, 1, call, mean, variance)
+      val var1 = computeVaR(1000, Array(call), mean, variance)
       /*
        * all random variables used for generating scenarios are independent so the 1% var must
        * be equal to 1% of the mean price !
@@ -104,12 +103,13 @@ class PriceSpec extends Specification  {
   "distributing VaR computation" should {
 
     val portfolio : Array[Option] = for(maturity <- Range(30 ,720 , 30).toArray; strike <- Range(10, 200 , 10).toArray) yield Call(maturity, strike)
-    val samples = 1000
+    val samples = 10000
 
     "compute VaR sequentially" in { 
+      import sequentialVaR._
 
       val start = System.nanoTime
-      val vaR = computeVaRSequentially(samples, portfolio, mean, variance)
+      val vaR = computeVaR(samples, portfolio, mean, variance)
       val elapsedMs : Double = (System.nanoTime - start) / 1000000.0
 
       println("sequential VaR computation (" + samples +" scenarios, "+ portfolio.length +" positions) = " + "%.3f".format(elapsedMs))
@@ -118,8 +118,10 @@ class PriceSpec extends Specification  {
     }
 
     "compute VaR with akka workers" in { 
+      import parallelVaR._
+
       val start = System.nanoTime
-      val vaR = computeVaRInParallel(samples, portfolio, mean, variance)
+      val vaR = computeVaR(samples, portfolio, mean, variance)
       val elapsedMs : Double = (System.nanoTime - start) / 1000000.0
 
       println("parallel VaR computation (" + samples +" scenarios, "+ portfolio.length +" positions) = " + "%.3f".format(elapsedMs))
