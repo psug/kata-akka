@@ -125,10 +125,12 @@
               <goal>testCompile</goal>
             </goals>
             <phase>compile</phase>
+            <!-- should ask advice to E.B. ;)
             <configuration>
               <useFsc>true</useFsc>
               <once>true</once>
             </configuration>
+            -->
           </execution>
         </executions>
         <configuration>

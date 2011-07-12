@@ -5,6 +5,7 @@ import BlackScholes._
 import org.apache.commons.math._
 import random._
 import stat.descriptive.rank._
+import akkavar.workers.{WorkOutput, WorkInput}
 
 case class MarketData(spot: Double, r: Double, vol: Double)
 
@@ -13,11 +14,11 @@ case class VaRInput(samples : Int,             /* number of random MktData param
                     contracts : Array[Option], /* portfolio to evaluate */
                     mean: MarketData,          /* mean distribution of market data parameters */
                     variance: MarketData       /* variance of marketdata parameters */
-                  )
+                  ) extends WorkInput
 
 case class  VaRResult(percentile : Array[Double], /* low percentile prices */
                       threshold: Double           /* threshold value (ie. upper limit of percentile values) */
-                    )
+                    ) extends WorkOutput
 
 
 trait VaR { 

@@ -2,59 +2,14 @@ package akkavar.work
 
 import BlackScholes._
 import akka.actor.Actor._
-import akka.actor.Actor
-import akka.actor.{ActorRef, Actor}
-import util.Random
-import collection.mutable.ArrayBuffer
-
-import java.net.InetAddress
+import akka.actor.ActorRef
 
 import org.apache.commons.math.stat.descriptive.rank._
-
-case object RegisterWorker
-
-class Worker( f : VaRInput => VaRResult, centralDispatcherHost:String ) extends Actor {
-
-  override def postStop(){
-    println( "Stop ---------- " + self)
-  }
-  override def preStart(){
-    // starting on another port than expecting server to avoid client/server collision
-    remote.start( InetAddress.getLocalHost.getHostName,5225 )
-    val centralDispatcher = remote.actorFor( "CentralDispatcher", centralDispatcherHost, 2552)
-    centralDispatcher ! RegisterWorker
-    println( "Register ---------- " + self)
-
-  }
-
-  def receive = {
-    case wi:VaRInput => println( "Got Work to do: " + wi ); self.reply( f( wi ) )
-  }
-}
+import akka.dispatch.Future
+import akkavar.workers.{Worker, CentralDispatcher}
 
 
-class CentralDispatcher extends Actor {
 
-  val workers = new ArrayBuffer[ActorRef]
-
-  def receive = {
-    case in : VaRInput => 
-      val worker = workers( Random.nextInt( workers.size ) )
-      println( "Dispatch to " + worker )
-      val future = worker !!! in
-
-      self.senderFuture.foreach{
-        senderFutur =>
-          senderFutur.completeWith( future )
-      }
-    case RegisterWorker =>
-      println( "Register " + self.sender +" - " + self.sender.get.homeAddress )
-      self.sender.foreach( workers += _ )
-
-    case m => println("UnManaged message: " + m )
-  }
-
-}
 
 object parallelVaR extends VaR { 
 
@@ -69,10 +24,12 @@ object parallelVaR extends VaR {
     for(i <- 0 to 9)
       workers(i) = actorOf{ new Worker( workFunc, "localhost" ) }.start()
 
-    var collectedOutput : Array[VaRResult] = new Array(samples / 1000)
+    var collectedFuture : Array[Future[Any]] = new Array(samples / 1000)
 
-    for(i <- 0 to (samples / 1000)-1)
-      collectedOutput(i) = (centralDispatcher !! VaRInput(1000,10,portfolio,mean,variance)).asInstanceOf[Option[VaRResult]].getOrElse(throw new RuntimeException("failed comptuing some actor"))
+    for(i <- 0 to (samples / 1000)-1 )
+      collectedFuture(i) = centralDispatcher !!! VaRInput(1000,10,portfolio,mean,variance)
+
+    val collectedVaRResult = collectedFuture.map{ future => future.await; future.result.get.asInstanceOf[VaRResult] }
 
     remote.unregister("CentralDispatcher")
     remote.shutdown()
@@ -81,7 +38,24 @@ object parallelVaR extends VaR {
     centralDispatcher.stop
 
     // compute 1% percentile from subjobs
-    val premiums = collectedOutput.flatMap (_.percentile)
+    val premiums = collectedVaRResult.flatMap (_.percentile)
+    val percent = new Percentile().evaluate(premiums,10)
+    val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
+    (percent - actualprice) / actualprice
+  }
+
+}
+
+
+object parallelCollectionVaR extends VaR {
+
+  override def computeVaR(samples : Int, portfolio : Array[Options.Option], mean: MarketData, variance: MarketData) : Double = {
+
+    val collectedVaRResult = (0 to (samples / 1000)-1 ).par.map( _ => computeVaRRaw( VaRInput(1000,10,portfolio,mean,variance) ) )
+
+
+    // compute 1% percentile from subjobs
+    val premiums = collectedVaRResult.flatMap (_.percentile).toArray
     val percent = new Percentile().evaluate(premiums,10)
     val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
     (percent - actualprice) / actualprice

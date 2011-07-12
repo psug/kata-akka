@@ -5,13 +5,13 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.Specification
 import akka.actor.Actor._
-import akka.actor.Actor
 
 /**
  * User: alag
  * Date: 7/9/11
  * Time: 7:33 PM
  */
+
 
 
 
@@ -24,12 +24,12 @@ class AkkaWorkersSpec extends Specification {
       val centralDispatcher = actorOf[CentralDispatcher]
       remote.register("CentralDispatcher", centralDispatcher )
 
-      val workFunc = ( in:WorkInput ) => WorkOutput( in.data )
+      val workFunc = ( in:DataWorkInput ) => DataWorkOutput( in.data )
       val worker = actorOf{ new Worker( workFunc, "localhost" ) }.start()
 
       val data = "Data"
 
-      val Some( workOuput ) = centralDispatcher !!  WorkInput( data )
+      val Some( workOuput ) = centralDispatcher !!  DataWorkInput( data )
 
 
       remote.unregister("CentralDispatcher")
@@ -38,7 +38,7 @@ class AkkaWorkersSpec extends Specification {
       worker.stop()
       centralDispatcher.stop()
 
-      workOuput === WorkOutput( data )
+      workOuput === DataWorkOutput( data )
 
     }
   }

@@ -13,12 +13,15 @@ import java.net.InetAddress
  */
 
 
-case class WorkInput( data:String )
-case class WorkOutput( data:String )
+class WorkInput
+class WorkOutput
 case object RegisterWorker
 
+case class DataWorkInput( data:String ) extends WorkInput
+case class DataWorkOutput( data:String ) extends WorkOutput
 
-class Worker( f : WorkInput => WorkOutput, centralDispatcherHost:String ) extends Actor {
+
+class Worker[IN<:WorkInput, OUT<:WorkOutput]( f : IN => OUT, centralDispatcherHost:String ) extends Actor {
 
   override def postStop(){
     println( "Stop ---------- " + self)
@@ -33,7 +36,7 @@ class Worker( f : WorkInput => WorkOutput, centralDispatcherHost:String ) extend
   }
 
   def receive = {
-    case wi:WorkInput => println( "Got Work to do: " + wi ); self.reply( f( wi ) )
+    case wi:IN => println( "Got Work to do: " + wi ); self.reply( f( wi ) )
   }
 }
 
@@ -43,10 +46,10 @@ class CentralDispatcher extends Actor {
   val workers = new ArrayBuffer[ActorRef]
 
   def receive = {
-    case WorkInput( data ) =>
+    case input:WorkInput =>
       val worker = workers( Random.nextInt( workers.size ) )
       println( "Dispatch to " + worker )
-      val future = worker !!! WorkInput( data )
+      val future = worker !!! input
 
       self.senderFuture.foreach{
         senderFutur =>
