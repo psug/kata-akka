@@ -45,3 +45,20 @@ object parallelVaR extends VaR {
   }
 
 }
+
+
+object parallelCollectionVaR extends VaR {
+
+  override def computeVaR(samples : Int, portfolio : Array[Options.Option], mean: MarketData, variance: MarketData) : Double = {
+
+    val collectedVaRResult = (0 to (samples / 1000)-1 ).par.map( _ => computeVaRRaw( VaRInput(1000,1,portfolio,mean,variance) ) )
+
+
+    // compute 1% percentile from subjobs
+    val premiums = collectedVaRResult.flatMap (_.percentile)
+    val percent = new Percentile().evaluate(premiums,1)
+    val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
+    (percent - actualprice) / actualprice
+  }
+
+}
