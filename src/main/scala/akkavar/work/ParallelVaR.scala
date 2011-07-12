@@ -10,6 +10,7 @@ import collection.mutable.ArrayBuffer
 import java.net.InetAddress
 
 import org.apache.commons.math.stat.descriptive.rank._
+import akka.dispatch.Future
 
 case object RegisterWorker
 
@@ -69,10 +70,14 @@ object parallelVaR extends VaR {
     for(i <- 0 to 9)
       workers(i) = actorOf{ new Worker( workFunc, "localhost" ) }.start()
 
-    var collectedOutput : Array[VaRResult] = new Array(samples / 1000)
+    var collectedOutput : Array[Future[Any]] = new Array(samples / 1000)
+
+
 
     for(i <- 0 to (samples / 1000)-1)
-      collectedOutput(i) = (centralDispatcher !! VaRInput(1000,1,portfolio,mean,variance)).asInstanceOf[Option[VaRResult]].getOrElse(throw new RuntimeException("failed comptuing some actor"))
+      collectedOutput(i) = centralDispatcher !!! VaRInput(1000,1,portfolio,mean,variance)
+
+
 
     remote.unregister("CentralDispatcher")
     remote.shutdown()
@@ -81,7 +86,7 @@ object parallelVaR extends VaR {
     centralDispatcher.stop
 
     // compute 1% percentile from subjobs
-    val premiums = collectedOutput.flatMap (_.percentile)
+    val premiums = collectedOutput.map{ future => future.await; future.result.get.asInstanceOf[VaRResult] }.flatMap (_.percentile)
     val percent = new Percentile().evaluate(premiums,1)
     val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
     (percent - actualprice) / actualprice
