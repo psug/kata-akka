@@ -55,7 +55,7 @@ object parallelCollectionVaR extends VaR {
 
 
     // compute 1% percentile from subjobs
-    val premiums = collectedVaRResult.flatMap (_.percentile)
+    val premiums = collectedVaRResult.flatMap (_.percentile).toArray
     val percent = new Percentile().evaluate(premiums,1)
     val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
     (percent - actualprice) / actualprice
