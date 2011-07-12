@@ -72,7 +72,7 @@ object parallelVaR extends VaR {
     var collectedOutput : Array[VaRResult] = new Array(samples / 1000)
 
     for(i <- 0 to (samples / 1000)-1)
-      collectedOutput(i) = (centralDispatcher !! VaRInput(1000,1,portfolio,mean,variance)).asInstanceOf[Option[VaRResult]].getOrElse(throw new RuntimeException("failed comptuing some actor"))
+      collectedOutput(i) = (centralDispatcher !! VaRInput(1000,10,portfolio,mean,variance)).asInstanceOf[Option[VaRResult]].getOrElse(throw new RuntimeException("failed comptuing some actor"))
 
     remote.unregister("CentralDispatcher")
     remote.shutdown()
@@ -82,7 +82,7 @@ object parallelVaR extends VaR {
 
     // compute 1% percentile from subjobs
     val premiums = collectedOutput.flatMap (_.percentile)
-    val percent = new Percentile().evaluate(premiums,1)
+    val percent = new Percentile().evaluate(premiums,10)
     val actualprice = prices(portfolio, mean.spot,mean.r,mean.vol).map(_.premium).foldLeft(0.0)(_ + _)
     (percent - actualprice) / actualprice
   }
