@@ -1,9 +1,9 @@
 package akkavar
 
 import akka.actor.Actor._
-import workers.{WorkInput, CentralDispatcher}
 import java.util.Scanner
 import java.net.InetAddress
+import workers.{DataWorkInput, CentralDispatcher}
 
 
 object Server {
@@ -20,7 +20,7 @@ object Server {
     new Scanner(System.in).nextLine()
     println("Start computing....----------------------------------")
 
-    val Some( workOuput ) = centralDispatcher !!  WorkInput( "Data" )
+    val Some( workOuput ) = centralDispatcher !!  DataWorkInput( "Data" )
     println("Result " + workOuput )
 
     println("Any key stop ----------------------------------")
